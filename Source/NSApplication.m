@@ -2270,7 +2270,7 @@ IF_NO_GC(NSAssert([event retainCount] > 0, NSInternalInconsistencyException));
 
   if (resp != nil)
     {
-      IMP actionIMP = [resp methodForSelector: aSelector];
+      void (*actionIMP)(id, SEL, id) = (void (*)(id, SEL, id))[resp methodForSelector: aSelector];
 
       if (0 != actionIMP)
         {
@@ -2374,7 +2374,7 @@ IF_NO_GC(NSAssert([event retainCount] > 0, NSInternalInconsistencyException));
     }
   if (_delegate != nil && [_delegate respondsToSelector: aSelector])
     {
-      IMP actionIMP = [_delegate methodForSelector: aSelector];
+      void (*actionIMP)(id, SEL, id) = (void (*)(id, SEL, id))[_delegate methodForSelector: aSelector];
       if (0 != actionIMP)
         {
           actionIMP(_delegate, aSelector, anObject);

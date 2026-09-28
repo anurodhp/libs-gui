@@ -2795,7 +2795,7 @@ static BOOL browserUseBezels;
       NSInteger match;
       NSInteger selectedColumn;
       SEL lcarcSel = @selector(loadedCellAtRow:column:);
-      IMP lcarc = [self methodForSelector: lcarcSel];
+      id (*lcarc)(id, SEL, NSInteger, NSInteger) = [self methodForSelector: lcarcSel];
 
       selectedColumn = [self selectedColumn];
       if (selectedColumn != -1)
@@ -3594,9 +3594,9 @@ static BOOL browserUseBezels;
       // Now loop through the cells and load each one
       id aCell;
       SEL sel1 = @selector(browser:willDisplayCell:atRow:column:);
-      IMP imp1 = [_browserDelegate methodForSelector: sel1];
+      void (*imp1)(id, SEL, id, id, NSInteger, NSInteger) = [_browserDelegate methodForSelector: sel1];
       SEL sel2 = @selector(cellAtRow:column:);
-      IMP imp2 = [matrix methodForSelector: sel2];
+      id (*imp2)(id, SEL, NSInteger, NSInteger) = [matrix methodForSelector: sel2];
 
       for (i = 0; i < rows; i++)
 	{

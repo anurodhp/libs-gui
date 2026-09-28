@@ -64,8 +64,8 @@ APPKIT_EXPORT_CLASS
   NSZone	*_myZone;
   Class		_cellClass;
   id		_cellPrototype;
-  IMP		_cellNew;
-  IMP		_cellInit;
+  id		(*_cellNew)(id, SEL, NSZone*);
+  id		(*_cellInit)(id, SEL);
   NSMatrixMode	_mode;
   NSSize	_cellSize;
   NSSize	_intercell;

@@ -694,8 +694,8 @@ static NSSize scaledIconSizeForSize(NSSize imageSize)
  */
 static SEL        ccSel;
 static SEL        ctSel;
-static IMP        ccImp;
-static IMP        ctImp;
+static void       (*ccImp)(id, SEL, id, id);
+static void       (*ctImp)(id, SEL, id, id);
 static Class      responderClass;
 static Class      viewClass;
 static NSMutableSet *autosaveNames;
@@ -713,8 +713,8 @@ static NSNotificationCenter *nc = nil;
       [self setVersion: 3];
       ccSel = @selector(_checkCursorRectangles:forEvent:);
       ctSel = @selector(_checkTrackingRectangles:forEvent:);
-      ccImp = [self instanceMethodForSelector: ccSel];
-      ctImp = [self instanceMethodForSelector: ctSel];
+      ccImp = (void (*)(id, SEL, id, id))[self instanceMethodForSelector: ccSel];
+      ctImp = (void (*)(id, SEL, id, id))[self instanceMethodForSelector: ctSel];
       responderClass = [NSResponder class];
       viewClass = [NSView class];
       autosaveNames = [NSMutableSet new];

@@ -337,7 +337,7 @@ create_error(int code, NSString* desc)
 {
   NSDictionary	*all;
   static SEL	sel = 0;
-  IMP		objForKey;
+  id		(*objForKey)(id, SEL, id);
   id		objects[8];
   id		keys[8];
   int		count = 0;
@@ -354,7 +354,7 @@ create_error(int code, NSString* desc)
     {
       sel = @selector (objectForKey: );
     }
-  objForKey = [all methodForSelector: sel];
+  objForKey = (id (*)(id, SEL, id))[all methodForSelector: sel];
   
 #define NSATT_GET_ATTRIBUTE(attribute) \
   keys[count] = attribute; \

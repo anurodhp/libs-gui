@@ -509,7 +509,7 @@ static SEL getSel;
    */
   if (count > 0)
     {
-      IMP getImp = [cellArray methodForSelector: getSel];
+      id (*getImp)(id, SEL, NSUInteger) = [cellArray methodForSelector: getSel];
 
       for (i = 0; i < _numRows && i < count; i++)
 	{
@@ -614,7 +614,7 @@ static SEL getSel;
    */
   if (count > 0)
     {
-      IMP getImp = [cellArray methodForSelector: getSel];
+      id (*getImp)(id, SEL, NSUInteger) = [cellArray methodForSelector: getSel];
 
       for (i = 0; i < _numCols && i < count; i++)
 	{
@@ -843,13 +843,13 @@ static SEL getSel;
 		   context: (void*)context
 {
   NSMutableArray *sorted;
-  IMP add;
-  IMP get;
+  void (*add)(id, SEL, id);
+  id (*get)(id, SEL, NSUInteger);
   NSInteger i, j, index = 0;
 
   sorted = [NSMutableArray arrayWithCapacity: _numRows * _numCols];
-  add = [sorted methodForSelector: @selector(addObject:)];
-  get = [sorted methodForSelector: @selector(objectAtIndex:)];
+  add = (void (*)(id, SEL, id))[sorted methodForSelector: @selector(addObject:)];
+  get = (id (*)(id, SEL, NSUInteger))[sorted methodForSelector: @selector(objectAtIndex:)];
 
   for (i = 0; i < _numRows; i++)
     {
@@ -873,13 +873,13 @@ static SEL getSel;
 - (void) sortUsingSelector: (SEL)comparator
 {
   NSMutableArray *sorted;
-  IMP add;
-  IMP get;
+  void (*add)(id, SEL, id);
+  id (*get)(id, SEL, NSUInteger);
   NSInteger i, j, index = 0;
 
   sorted = [NSMutableArray arrayWithCapacity: _numRows * _numCols];
-  add = [sorted methodForSelector: @selector(addObject:)];
-  get = [sorted methodForSelector: @selector(objectAtIndex:)];
+  add = (void (*)(id, SEL, id))[sorted methodForSelector: @selector(addObject:)];
+  get = (id (*)(id, SEL, NSUInteger))[sorted methodForSelector: @selector(objectAtIndex:)];
 
   for (i = 0; i < _numRows; i++)
     {
@@ -1513,11 +1513,11 @@ static SEL getSel;
 - (NSArray*) cells
 {
   NSMutableArray *c;
-  IMP add;
+  void (*add)(id, SEL, id);
   NSInteger i;
 
   c = [NSMutableArray arrayWithCapacity: _numRows * _numCols];
-  add = [c methodForSelector: @selector(addObject:)];
+  add = (void (*)(id, SEL, id))[c methodForSelector: @selector(addObject:)];
   for (i = 0; i < _numRows; i++)
     {
       NSInteger j;
@@ -2998,8 +2998,8 @@ static SEL getSel;
     {
       _cellClass = defaultCellClass;
     }
-  _cellNew = [_cellClass methodForSelector: allocSel];
-  _cellInit = [_cellClass instanceMethodForSelector: initSel];
+  _cellNew = (id (*)(id, SEL, NSZone*))[_cellClass methodForSelector: allocSel];
+  _cellInit = (id (*)(id, SEL))[_cellClass instanceMethodForSelector: initSel];
   DESTROY(_cellPrototype);
 }
 
@@ -3025,7 +3025,7 @@ static SEL getSel;
     }
   else
     {
-      _cellNew = [_cellPrototype methodForSelector: copySel];
+      _cellNew = (id (*)(id, SEL, NSZone*))[_cellPrototype methodForSelector: copySel];
       _cellInit = 0;
       _cellClass = [aCell class];
     }
@@ -3963,7 +3963,7 @@ static SEL getSel;
   NSInteger oldMaxC;
   NSInteger oldMaxR;
   SEL mkSel = @selector(makeCellAtRow:column:);
-  IMP mkImp = [self methodForSelector: mkSel];
+  id (*mkImp)(id, SEL, NSInteger, NSInteger) = [self methodForSelector: mkSel];
 
 //NSLog(@"%x - mr: %d mc:%d nr:%d nc:%d r:%d c:%d", (unsigned)self, _maxRows, _maxCols, _numRows, _numCols, row, col);
   if (row < 0)

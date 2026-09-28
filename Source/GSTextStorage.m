@@ -92,8 +92,8 @@ static NSLock		*attrLock = nil;
 static GSIMapTable_t	attrMap;
 static SEL		lockSel;
 static SEL		unlockSel;
-static IMP		lockImp;
-static IMP		unlockImp;
+static void		(*lockImp)(id, SEL);
+static void		(*unlockImp)(id, SEL);
 
 #define	ALOCK()	if (attrLock != nil) (*lockImp)(attrLock, lockSel)
 #define	AUNLOCK() if (attrLock != nil) (*unlockImp)(attrLock, unlockSel)
@@ -344,11 +344,11 @@ static SEL insSel;
 static SEL oatSel;
 static SEL remSel;
 
-static IMP	infImp;
+static id	(*infImp)(id, SEL, NSZone*, id, unsigned);
 static void	(*addImp)(NSMutableArray*, SEL, NSObject*);
 static unsigned (*cntImp)(NSMutableArray*, SEL);
 static void	(*insImp)(NSMutableArray*, SEL, NSObject*, NSUInteger);
-static IMP	oatImp;
+static id	(*oatImp)(id, SEL, NSUInteger);
 static void	(*remImp)(NSMutableArray*, SEL, NSUInteger);
 
 #define	NEWINFO(Z,O,L)	((*infImp)(infCls, infSel, (Z), (O), (L)))
@@ -380,14 +380,14 @@ static void _setup()
       remSel = @selector(removeObjectAtIndex:);
 
       infCls = [GSTextInfo class];
-      infImp = [infCls methodForSelector: infSel];
+      infImp = (id (*)(id, SEL, NSZone*, id, unsigned))[infCls methodForSelector: infSel];
 
       a = [NSMutableArray allocWithZone: NSDefaultMallocZone()];
       a = [a initWithCapacity: 1];
-      addImp = (void (*)())[a methodForSelector: addSel];
+      addImp = (void (*)(NSMutableArray*, SEL, NSObject*))[a methodForSelector: addSel];
       cntImp = (unsigned (*)())[a methodForSelector: cntSel];
       insImp = (void (*)())[a methodForSelector: insSel];
-      oatImp = [a methodForSelector: oatSel];
+      oatImp = (id (*)(id, SEL, NSUInteger))[a methodForSelector: oatSel];
       remImp = (void (*)())[a methodForSelector: remSel];
       RELEASE(a);
 
@@ -563,8 +563,8 @@ _attributesAtIndexEffectiveRange(
   attrLock = [NSLock new];
   lockSel = @selector(lock);
   unlockSel = @selector(unlock);
-  lockImp = [attrLock methodForSelector: lockSel];
-  unlockImp = [attrLock methodForSelector: unlockSel];
+  lockImp = (void (*)(id, SEL))[attrLock methodForSelector: lockSel];
+  unlockImp = (void (*)(id, SEL))[attrLock methodForSelector: unlockSel];
 }
 
 + (void) initialize

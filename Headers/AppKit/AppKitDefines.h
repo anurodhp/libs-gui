@@ -72,7 +72,13 @@
 
 #endif
 
-#if defined(__clang__) && !defined(__MINGW32__)
+/* Under Apple's objc4 (non-fragile objc2 ABI on Mach-O) clang emits each
+ * @package ivar's OBJC_IVAR_$_Class.ivar offset symbol private_extern, so
+ * bundles and the backend (separate images that use these ivars, e.g.
+ * Model/GMAppKit.m with NSView's _sub_views and _rFlags) cannot link.
+ * Same situation, and same answer, as MinGW's.
+ */
+#if defined(__clang__) && !defined(__MINGW32__) && !GS_OBJC4_RUNTIME
 #  define PACKAGE_SCOPE @package
 #else
 #  define PACKAGE_SCOPE @public

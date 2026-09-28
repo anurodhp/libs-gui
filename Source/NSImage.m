@@ -399,7 +399,7 @@ static GSRepData*
 repd_for_rep(NSArray *_reps, NSImageRep *rep)
 {
   NSEnumerator *enumerator = [_reps objectEnumerator];
-  IMP nextImp = [enumerator methodForSelector: @selector(nextObject)];
+  id (*nextImp)(id, SEL) = (id (*)(id, SEL))[enumerator methodForSelector: @selector(nextObject)];
   GSRepData *repd;
 
   while ((repd = (*nextImp)(enumerator, @selector(nextObject))) != nil)

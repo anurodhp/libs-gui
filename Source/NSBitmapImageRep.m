@@ -2159,8 +2159,8 @@ _set_bit_value(unsigned char *base, long msb_off, int bit_width,
   NSInteger start, end, i, ai;
   SEL getPSel = @selector(getPixel:atX:y:);
   SEL setPSel = @selector(setPixel:atX:y:);
-  IMP getP = [self methodForSelector: getPSel];
-  IMP setP = [self methodForSelector: setPSel];
+  void (*getP)(id, SEL, NSUInteger[], NSInteger, NSInteger) = [self methodForSelector: getPSel];
+  void (*setP)(id, SEL, NSUInteger[], NSInteger, NSInteger) = [self methodForSelector: setPSel];
 
   if (!_hasAlpha || !(_format & NSAlphaNonpremultipliedBitmapFormat))
     return;
@@ -2277,8 +2277,8 @@ _set_bit_value(unsigned char *base, long msb_off, int bit_width,
   NSInteger start, end, i, ai;
   SEL getPSel = @selector(getPixel:atX:y:);
   SEL setPSel = @selector(setPixel:atX:y:);
-  IMP getP = [self methodForSelector: getPSel];
-  IMP setP = [self methodForSelector: setPSel];
+  void (*getP)(id, SEL, NSUInteger[], NSInteger, NSInteger) = [self methodForSelector: getPSel];
+  void (*setP)(id, SEL, NSUInteger[], NSInteger, NSInteger) = [self methodForSelector: setPSel];
 
   if (!_hasAlpha || (_format & NSAlphaNonpremultipliedBitmapFormat))
     return;
@@ -2458,8 +2458,8 @@ _set_bit_value(unsigned char *base, long msb_off, int bit_width,
         {
           SEL getPSel = @selector(getPixel:atX:y:);
           SEL setPSel = @selector(setPixel:atX:y:);
-          IMP getP = [self methodForSelector: getPSel];
-          IMP setP = [new methodForSelector: setPSel];
+          void (*getP)(id, SEL, NSUInteger[], NSInteger, NSInteger) = [self methodForSelector: getPSel];
+          void (*setP)(id, SEL, NSUInteger[], NSInteger, NSInteger) = [new methodForSelector: setPSel];
           NSUInteger pixelData[5];
           NSInteger x, y;
           CGFloat _scale;
@@ -2599,8 +2599,8 @@ _set_bit_value(unsigned char *base, long msb_off, int bit_width,
         {
           SEL getPSel = @selector(getPixel:atX:y:);
           SEL setPSel = @selector(setPixel:atX:y:);
-          IMP getP = [self methodForSelector: getPSel];
-          IMP setP = [new methodForSelector: setPSel];
+          void (*getP)(id, SEL, NSUInteger[], NSInteger, NSInteger) = (void (*)(id, SEL, NSUInteger[], NSInteger, NSInteger))[self methodForSelector: getPSel];
+          void (*setP)(id, SEL, NSUInteger[], NSInteger, NSInteger) = (void (*)(id, SEL, NSUInteger[], NSInteger, NSInteger))[new methodForSelector: setPSel];
           NSUInteger pixelData[4];
           NSInteger x, y;
           CGFloat _scale;
@@ -2720,8 +2720,8 @@ _set_bit_value(unsigned char *base, long msb_off, int bit_width,
         {
           SEL getCSel = @selector(colorAtX:y:);
           SEL setCSel = @selector(setColor:atX:y:);
-          IMP getC = [self methodForSelector: getCSel];
-          IMP setC = [new methodForSelector: setCSel];
+          id (*getC)(id, SEL, NSInteger, NSInteger) = [self methodForSelector: getCSel];
+          void (*setC)(id, SEL, id, NSInteger, NSInteger) = [new methodForSelector: setCSel];
           NSInteger i, j;
 
           NSDebugLLog(@"NSImage", @"Slow converting %@ bitmap data to %@", 

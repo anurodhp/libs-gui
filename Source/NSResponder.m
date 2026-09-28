@@ -111,7 +111,7 @@
   /* Can we perform the action -then do it */
   if ([self respondsToSelector: anAction])
     {
-      IMP actionIMP = [self methodForSelector: anAction];
+      void (*actionIMP)(id, SEL, id) = (void (*)(id, SEL, id))[self methodForSelector: anAction];
       if (0 != actionIMP)
         {
           actionIMP(self, anAction, anObject);
