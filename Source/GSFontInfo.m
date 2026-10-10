@@ -831,6 +831,15 @@ static GSFontEnumerator *sharedEnumerator = nil;
     return NSNullGlyph;
 }
 
+- (NSGlyph) glyphForUTF32Character: (unsigned int)theChar
+{
+  if (theChar <= 0xffff)
+    return [self glyphForCharacter: (unichar)theChar];
+  if ([self glyphIsEncoded: (NSGlyph)theChar])
+    return (NSGlyph)theChar;
+  return NSNullGlyph;
+}
+
 - (NSFontDescriptor*) fontDescriptor
 {
   if (fontDescriptor == nil)

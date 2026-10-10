@@ -111,8 +111,8 @@ fb04 'ffl'
   SEL cim_sel = @selector(characterIsMember:);
   BOOL (*characterIsMember)(id, SEL, unichar)
     = (BOOL(*)(id, SEL, unichar)) [cs methodForSelector: cim_sel];
-  SEL gfc_sel = @selector(glyphForCharacter:);
-  NSGlyph (*glyphForCharacter)(id, SEL, unichar);
+  SEL gfc_sel = @selector(glyphForUTF32Character:);
+  NSGlyph (*glyphForCharacter)(id, SEL, unsigned int);
   NSGlyph fallback = NSNullGlyph;
 
   [[attrstr string] getCharacters: buf range: maxRange];
@@ -126,7 +126,7 @@ fb04 'ffl'
                    format: @"Glyph generation with no font."];
       return;
     }
-  glyphForCharacter = (NSGlyph(*)(id, SEL, unichar)) [fi methodForSelector: gfc_sel];
+  glyphForCharacter = (NSGlyph(*)(id, SEL, unsigned int)) [fi methodForSelector: gfc_sel];
 
   n = [attributes objectForKey: NSLigatureAttributeName];
   if (n)

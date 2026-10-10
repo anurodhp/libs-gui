@@ -156,6 +156,9 @@ APPKIT_EXPORT_CLASS
 - (CGFloat) widthOfString: (NSString*)string;
 - (CGFloat) xHeight;
 - (NSGlyph) glyphForCharacter: (unichar)theChar;
+/* Same for a full code point: characters above U+FFFF (surrogate pairs in
+   the source string) must not be truncated to 16 bits. */
+- (NSGlyph) glyphForUTF32Character: (unsigned int)theChar;
 - (NSFontDescriptor*) fontDescriptor;
 
 @end
