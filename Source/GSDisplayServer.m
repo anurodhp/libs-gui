@@ -794,6 +794,18 @@ GSCurrentServer(void)
   [self subclassResponsibility: _cmd];
 }
 
+/**
+ * Like -styleoffsets:::::, for the window win as it is now: a window
+ * manager can decorate one window differently from others of its style --
+ * a full-screen window has no decorations at all. Defaults to the style's
+ * offsets; a backend that knows a window's own decorations overrides it.
+ */
+- (void) styleoffsets: (float*) l : (float*) r : (float*) t : (float*) b
+		     : (unsigned int) style forWindow: (int) win
+{
+  [self styleoffsets: l : r : t : b : style];
+}
+
 /** Sets the document edited flag for the window */
 - (void) docedited: (int) edited : (int) win
 {

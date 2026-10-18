@@ -52,6 +52,11 @@
 }
 @end
 
+@interface GSWindowDecorationView (Offsets)
+- (void) _offsets: (float *)l : (float *)r : (float *)t : (float *)b
+     forStyleMask: (NSUInteger)style;
+@end
+
 @implementation GSWindowDecorationView
 
 static inline NSRect RectWithSizeScaledByFactor(NSRect aRect, CGFloat factor)
@@ -82,12 +87,10 @@ static inline NSRect RectWithSizeScaledByFactor(NSRect aRect, CGFloat factor)
   [self subclassResponsibility: _cmd];
 }
 
-+ (NSRect) contentRectForFrameRect: (NSRect)aRect
-			 styleMask: (NSUInteger)aStyle
+static NSRect
+content_rect_for_frame_rect(NSRect aRect, NSUInteger aStyle,
+                            float l, float r, float t, float b)
 {
-  float t = 0.0, b = 0.0, l = 0.0, r = 0.0;
-
-  [self offsets: &l : &r : &t : &b forStyleMask: aStyle];
   aRect.size.width -= l + r;
   aRect.size.height -= t + b;
   aRect.origin.x += l;
@@ -104,12 +107,10 @@ static inline NSRect RectWithSizeScaledByFactor(NSRect aRect, CGFloat factor)
  return aRect;
 }
 
-+ (NSRect) frameRectForContentRect: (NSRect)aRect
-			 styleMask: (NSUInteger)aStyle
+static NSRect
+frame_rect_for_content_rect(NSRect aRect, NSUInteger aStyle,
+                            float l, float r, float t, float b)
 {
-  float t = 0.0, b = 0.0, l = 0.0, r = 0.0;
-
-  [self offsets: &l : &r : &t : &b forStyleMask: aStyle];
   if (0 == (aStyle & NSUnscaledWindowMask))
     {
       // FIXME: This method should probably take a screen parameter
@@ -125,6 +126,51 @@ static inline NSRect RectWithSizeScaledByFactor(NSRect aRect, CGFloat factor)
   aRect.origin.y -= b;
 
   return aRect;
+}
+
++ (NSRect) contentRectForFrameRect: (NSRect)aRect
+			 styleMask: (NSUInteger)aStyle
+{
+  float t = 0.0, b = 0.0, l = 0.0, r = 0.0;
+
+  [self offsets: &l : &r : &t : &b forStyleMask: aStyle];
+  return content_rect_for_frame_rect(aRect, aStyle, l, r, t, b);
+}
+
++ (NSRect) frameRectForContentRect: (NSRect)aRect
+			 styleMask: (NSUInteger)aStyle
+{
+  float t = 0.0, b = 0.0, l = 0.0, r = 0.0;
+
+  [self offsets: &l : &r : &t : &b forStyleMask: aStyle];
+  return frame_rect_for_content_rect(aRect, aStyle, l, r, t, b);
+}
+
+/* The offsets of this decoration view's window as it is now; the class
+ * method's, per style, unless a subclass knows better (see
+ * GSBackendWindowDecorationView). */
+- (void) _offsets: (float *)l : (float *)r : (float *)t : (float *)b
+     forStyleMask: (NSUInteger)style
+{
+  [object_getClass(self) offsets: l : r : t : b forStyleMask: style];
+}
+
+- (NSRect) _contentRectForFrameRect: (NSRect)aRect
+                          styleMask: (NSUInteger)aStyle
+{
+  float t = 0.0, b = 0.0, l = 0.0, r = 0.0;
+
+  [self _offsets: &l : &r : &t : &b forStyleMask: aStyle];
+  return content_rect_for_frame_rect(aRect, aStyle, l, r, t, b);
+}
+
+- (NSRect) _frameRectForContentRect: (NSRect)aRect
+                          styleMask: (NSUInteger)aStyle
+{
+  float t = 0.0, b = 0.0, l = 0.0, r = 0.0;
+
+  [self _offsets: &l : &r : &t : &b forStyleMask: aStyle];
+  return frame_rect_for_content_rect(aRect, aStyle, l, r, t, b);
 }
 
 + (CGFloat) minFrameWidthWithTitle: (NSString *)aTitle
@@ -182,9 +228,7 @@ static inline NSRect RectWithSizeScaledByFactor(NSRect aRect, CGFloat factor)
 - (NSRect) contentRectForFrameRect: (NSRect)aRect
                          styleMask: (NSUInteger)aStyle
 {
-  NSRect content = [object_getClass(self) 
-                       contentRectForFrameRect: aRect
-                       styleMask: aStyle];
+  NSRect content = [self _contentRectForFrameRect: aRect styleMask: aStyle];
   NSToolbar *tb = [_window toolbar];
 
   if ([_window menu] != nil)
@@ -225,8 +269,7 @@ static inline NSRect RectWithSizeScaledByFactor(NSRect aRect, CGFloat factor)
       aRect.size.height += [tv _heightFromLayout];
     }
 
-  return [object_getClass(self) frameRectForContentRect: aRect
-                                              styleMask: aStyle];
+  return [self _frameRectForContentRect: aRect styleMask: aStyle];
 }
 
 /* If the contentView is removed from the window we must make sure the
@@ -283,9 +326,8 @@ static inline NSRect RectWithSizeScaledByFactor(NSRect aRect, CGFloat factor)
   NSView *windowContentView = [_window contentView];
 
   frame.origin = NSZeroPoint;
-  contentViewFrame = [object_getClass(self)
-                         contentRectForFrameRect: frame
-                         styleMask: [window styleMask]];
+  contentViewFrame = [self _contentRectForFrameRect: frame
+                                          styleMask: [window styleMask]];
 
   if (hasMenu)
     {
@@ -399,9 +441,8 @@ static inline NSRect RectWithSizeScaledByFactor(NSRect aRect, CGFloat factor)
   _autoresizes_subviews = NO;
   [super setFrame: frameRect];
 
-  contentRect = [object_getClass(self)
-                    contentRectForFrameRect: frameRect
-                    styleMask: [window styleMask]];
+  contentRect = [self _contentRectForFrameRect: frameRect
+                                     styleMask: [window styleMask]];
 
   // Safety Check.
   [cv setAutoresizingMask: NSViewWidthSizable | NSViewHeightSizable];
@@ -583,6 +624,19 @@ static inline NSRect RectWithSizeScaledByFactor(NSRect aRect, CGFloat factor)
     forStyleMask: (NSUInteger)style
 {
   [GSCurrentServer() styleoffsets: l : r : t : b : style];
+}
+
+/* The window manager's decorations of this window as they are now (a
+ * full-screen window has none), once there is a backend window: otherwise
+ * a full-screen window kept its content inset by the decorated offsets. */
+- (void) _offsets: (float *)l : (float *)r : (float *)t : (float *)b
+     forStyleMask: (NSUInteger)style
+{
+  if (windowNumber != 0)
+    [GSServerForWindow(window) styleoffsets: l : r : t : b : style
+                                  forWindow: windowNumber];
+  else
+    [super _offsets: l : r : t : b forStyleMask: style];
 }
 
 + (CGFloat) minFrameWidthWithTitle: (NSString *)aTitle
