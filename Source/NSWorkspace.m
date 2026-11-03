@@ -3447,8 +3447,16 @@ launchIdentifiers: (NSArray **)identifiers
     object: self
     userInfo: userinfo];
 
-  task = [NSTask launchedTaskWithLaunchPath: path arguments: args];
-  if (task == nil)
+  /* An application starts in the memory-pressure band the kernel kills
+   * first, sorted by size (10, JETSAM_PRIORITY_FOREGROUND), so that running
+   * out of memory ends the largest application rather than the X server or
+   * the system's daemons, which stay in the default band or above
+   * (NSTask+GNUstepBase.h -setJetsamPriority:). */
+  task = AUTORELEASE([NSTask new]);
+  [task setLaunchPath: path];
+  [task setArguments: args];
+  [task setJetsamPriority: 10];
+  if ([task launchAndReturnError: NULL] == NO)
     {
       return NO;
     }
